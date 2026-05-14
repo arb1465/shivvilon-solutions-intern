@@ -34,6 +34,7 @@ const QuotationDetail = () => {
   const navi = useNavigate();
   const pdfRef = useRef();
 
+  const [isGenerating, setIsGenerating] = useState(false);
   const quotation = quotations.find((q) => q.id == Number(id));
   const [editData, setEditData] = useState(quotation);
 
@@ -67,7 +68,7 @@ const QuotationDetail = () => {
     const updatedItem = {
       ...editData,
       quotationDate: getCurrentDateTime(),
-      amount: total,
+      amount: editData.amount || total,
     };
 
     const updatedData = quotations.map((item) =>
@@ -102,6 +103,40 @@ const QuotationDetail = () => {
 
     setIsEditing(false);
   };
+
+
+         const handleWhatsApp = () => {
+           if (!editData?.whatsapp) {
+             alert("Please add WhatsApp number");
+             return;
+           }
+         
+           let phone = editData.whatsapp.toString().replace(/\D/g, "");
+         
+           if (phone.length === 10) {
+             phone = "91" + phone;
+           }
+         
+           const materialsText = (editData.materials || [])
+             .filter(m => m.size)
+             .map(m => `• ${m.size} (${m.pic} pcs)`)
+             .join("\n");
+         
+           const message =
+         `Hello ${editData.cliName},
+
+         Your quotation:
+         ${materialsText}
+
+         Amount: ${editData.amount || total}
+         Date: ${editData.quotationDate}
+
+         Thank you!`;
+
+           const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+           window.open(url, "_blank");
+         };
 
   const renderCell = (field, index) => {
     const value = editData.materials[index][field];
@@ -165,11 +200,27 @@ const QuotationDetail = () => {
             )}
 
             <Button
-              btnName="Print"
+              btnName="Show WhatsApp"
+              btnColor="green"
+              onClick={handleWhatsApp}
+            />
+
+            <Button
+              btnName={isGenerating ? "Generating PDF..." : "Print"}
               btnColor="red"
-              onClick={() =>
-                handleDownloadPDF({ pdfRef, data: editData })
-              }
+              onClick={async () => {
+                setIsGenerating(true);
+
+                try {
+                  await handleDownloadPDF({
+                    pdfRef,
+                    data: editData,
+                  });
+                } 
+                finally {
+                  setIsGenerating(false);
+                }
+              }}
             />
 
           </Stack>
@@ -191,10 +242,11 @@ const QuotationDetail = () => {
           >
             <Typography sx={{ minWidth: 95 }}> Client Name: </Typography>
             <Input
-              inpName="cliName"
-              inpValue={editData.cliName}
-              readOnly={true}
-            />
+               inpName="cliName"
+               inpValue={editData.cliName}
+               readOnly={!isEditing}
+               onChange={handleChange}
+             />
 
             <Typography>Date:</Typography>
             <Input
@@ -264,19 +316,33 @@ const QuotationDetail = () => {
               <Box sx={{ display: "flex", flexDirection: "row", gap: "10px", justifyContent: "space-between", alignItems: "center" }}>
                 <Typography>Mobile No.:</Typography>
                 <Box sx={{ width: "60%" }}>
-                  <Input
+                 <Input
                     inpName="mobile"
                     inpValue={editData.mobile}
-                    readOnly={true}
+                    readOnly={!isEditing}
+                    onChange={handleChange}
                   />
                 </Box>
               </Box>
+
+              <Box sx={{ display: "flex", flexDirection: "row", gap: "10px",   justifyContent: "space-between",    alignItems: "center" }}>
+                 <Typography>WhatsApp No.:</Typography>
+                 <Box sx={{ width: "60%" }}>
+                   <Input
+                     inpName="whatsapp"
+                     inpValue={editData.whatsapp}
+                     readOnly={!isEditing}
+                     onChange={handleChange}
+                   />
+                 </Box>
+               </Box>
+
 
               <Box sx={{ display: "flex", flexDirection: "row", gap: "10px", justifyContent: "space-between", alignItems: "center" }}>
                 <Typography>Rate B1:</Typography>
                 <Box sx={{ width: "60%" }}>
                   <Input
-                    inpName="rateB"
+                    inpName="rateB1"
                     inpValue={editData.rateB1}
                     readOnly={!isEditing}
                     onChange={handleChange}
@@ -288,7 +354,7 @@ const QuotationDetail = () => {
                 <Typography>Rate B2:</Typography>
                 <Box sx={{ width: "60%" }}>
                   <Input
-                    inpName="rateB"
+                    inpName="rateB2"
                     inpValue={editData.rateB2}
                     readOnly={!isEditing}
                     onChange={handleChange}
@@ -308,6 +374,19 @@ const QuotationDetail = () => {
                 </Box>
               </Box>
 
+
+              <Box sx={{ display: "flex", flexDirection: "row", gap: "10px", justifyContent: "space-between", alignItems: "center" }}>
+               <Typography>Laser Cutting:</Typography>
+               <Box sx={{ width: "60%" }}>
+                 <Input
+                   inpName="laserCutting"
+                   inpValue={editData.laserCutting}
+                   readOnly={!isEditing}
+                   onChange={handleChange}
+                 />
+               </Box>
+              </Box>
+
               <Box sx={{ display: "flex", flexDirection: "row", gap: "10px", justifyContent: "space-between", alignItems: "center" }}>
                 <Typography>Add:</Typography>
                 <Box sx={{ width: "60%" }}>
@@ -323,7 +402,12 @@ const QuotationDetail = () => {
               <Box sx={{ display: "flex", flexDirection: "row", gap: "10px", justifyContent: "space-between", alignItems: "center" }}>
                 <Typography>Quotation Amount:</Typography>
                 <Box sx={{ width: "60%" }}>
-                  <Input readOnly inpValue={total} />
+                  <Input
+                    inpName="amount"
+                    inpValue={editData.amount}
+                    readOnly={!isEditing}
+                    onChange={handleChange}
+                  />
                 </Box>
               </Box>
 

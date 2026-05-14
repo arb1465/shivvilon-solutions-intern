@@ -84,6 +84,8 @@ const ShowQuotations = ({ data }) => {
               <TableCell>Name</TableCell>
               <TableCell>Thickness</TableCell>
               <TableCell>Amount</TableCell>
+              <TableCell>WhatsApp</TableCell>
+              <TableCell>Laser Cutting</TableCell>
               <TableCell>Status Update</TableCell>
               <TableCell>Edit</TableCell>
               <TableCell>Delete</TableCell>
@@ -111,6 +113,12 @@ const ShowQuotations = ({ data }) => {
 
                   {/* Amount */}
                   <TableCell>₹ {item.amount}</TableCell>
+
+                  {/* Whatsapp */}
+                  <TableCell>{item.whatsapp}</TableCell>
+
+                  {/* Laser Cutting */}
+                  <TableCell>{item.laserCutting}</TableCell>
 
                   {/* Status */}
                   <TableCell>

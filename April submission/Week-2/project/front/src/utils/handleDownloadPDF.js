@@ -18,15 +18,15 @@ export const handleDownloadPDF = async ({ pdfRef, data }) => {
   const containerWidth = rect.height * 2;
   const containerHeight = rect.width * 2;
 
-  // We scale the height slightly (1.02) to perfectly fill the A4 ratio (1.41)
-  const scaleHeight = 1.02;
-  const scaleWidth = 1.0;
+  // // We scale the height slightly (1.02) to perfectly fill the A4 ratio (1.41)
+  // const scaleHeight = 1.02;
+  // const scaleWidth = 1.0;
 
   Object.assign(printContainer.style, {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gridTemplateRows: "1fr 1fr",
-    gap: "0px",
+    gap: "10px",
     padding: "0px",
     width: `${containerWidth}px`,
     height: `${containerHeight}px`,
@@ -36,44 +36,126 @@ export const handleDownloadPDF = async ({ pdfRef, data }) => {
     backgroundColor: "#ffffff",
   });
 
-  for (let i = 0; i < 4; i++) {
-    const clone = originalElement.cloneNode(true);
-    const rotationWrapper = document.createElement("div");
+  const topLeftWrapper = document.createElement("div");
 
-    Object.assign(rotationWrapper.style, {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      width: "100%",
-      height: "100%",
-      overflow: "hidden",
-      // Adding a background color here helps if the border has rounded corners
-      backgroundColor: "#ffffff",
+  Object.assign(topLeftWrapper.style, {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    gap: "30px",
+  });
+
+
+  for (let i = 0; i < 3; i++) {
+    const clone = originalElement.cloneNode(true);
+
+    const inputs = clone.querySelectorAll("input");
+
+    inputs.forEach((inp) => {
+
+      const div = document.createElement("div");
+
+      div.innerText = inp.value;
+
+
+      Object.assign(div.style, {
+        width: inp.style.width || "100%",
+        maxWidth: "100%",
+        flex: "1",
+        minHeight: "24px",
+        fontSize: "8px",
+        padding: "2px 4px",
+        border: "1px solid #000",
+        outline: "none",
+        boxShadow: "none",
+        borderRadius: "0px",
+        background: "#fff",
+
+        whiteSpace: "normal",
+        overflowWrap: "break-word",
+        wordBreak: "break-word",
+
+        lineHeight: "1.4",
+        fontFamily: "inherit",
+        boxSizing: "border-box",
+
+        display: "flex",
+        alignItems: "center",
+      });
+
+      inp.parentNode.replaceChild(div, inp);
     });
+
+
+
+    const wrappers = clone.querySelectorAll(".MuiOutlinedInput-root");
+
+    wrappers.forEach((wrap) => {
+      wrap.style.border = "none";
+      wrap.style.outline = "none";
+      wrap.style.boxShadow = "none";
+      wrap.style.background = "transparent";
+    });
+
+    const fieldsets = clone.querySelectorAll("fieldset");
+
+    fieldsets.forEach((fs) => {
+      fs.style.border = "none";
+    });
+
+    const rows = clone.querySelectorAll("div");
+
+    rows.forEach((row) => {
+      row.style.gap = "2px";
+    });
+
+    const labels = clone.querySelectorAll(
+      "p, span, th, td, label, div"
+    );
+
+    labels.forEach((label) => {
+      label.style.fontSize = "10px";
+    });
+
 
     Object.assign(clone.style, {
-      transform: `rotate(-90deg) scale(${scaleHeight}, ${scaleWidth})`,
-      transformOrigin: "center center",
-      width: `${rect.width}px`,
-      height: `${rect.height}px`,
-      margin: "5px",
-      position: "static",
-      flexShrink: "0",
-
-      // Optional: If you want a slight "cut line" look, use dashed
-      border: "1px dashed #9ca3af", 
-      boxSizing: "border-box" // Ensures border stays inside the width/height
+      transform: "scale(1.0)",
+      transformOrigin: "top left",
+      margin: "0px",
+      border: "none",
     });
 
-    rotationWrapper.appendChild(clone);
-    printContainer.appendChild(rotationWrapper);
+    topLeftWrapper.appendChild(clone);
+
+    // Add separator line except after last item
+    if (i < 2) {
+      const divider = document.createElement("div");
+
+      Object.assign(divider.style, {
+        width: "100%",
+        borderTop: "2px dotted #666",
+        margin: "5px 0",
+      });
+
+      topLeftWrapper.appendChild(divider);
+    }
+  }
+
+
+  printContainer.appendChild(topLeftWrapper);
+
+
+  for (let i = 0; i < 3; i++) {
+    const empty = document.createElement("div");
+    printContainer.appendChild(empty);
   }
 
   document.body.appendChild(printContainer);
 
   try {
     const canvas = await html2canvas(printContainer, {
-      scale: 2, // Increase for print sharpness
+      scale: 4,
       useCORS: true,
       backgroundColor: "#ffffff"
     });
@@ -84,7 +166,7 @@ export const handleDownloadPDF = async ({ pdfRef, data }) => {
     // 210mm x 297mm is exactly 1.41 ratio. 
     // Our canvas is now also effectively 1.41 ratio.
     pdf.addImage(imgData, "PNG", 0, 0, 210, 297);
-    pdf.save(`Quotation_${data.cliName || "Export"}.pdf`);
+    pdf.save(`Quotation_${data.cliName || "Export"}_${data.mobile}.pdf`);
   } catch (error) {
     console.error("PDF Error:", error);
   } finally {
