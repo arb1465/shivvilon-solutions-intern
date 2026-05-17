@@ -18,30 +18,34 @@ import Input from "../../../components/ui/Input";
 import Button from "../../../components/ui/Button";
 import Popup from "../../../components/ui/Popup";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { QuotationContext } from "../../../contexts/quotation/quotationContext";
 import { ClientContext } from "../../../contexts/client/clientContext"
-import getCurrentDateTime from "../../../utils/getCurrentDateAndTime";
-import calculateAmount from "../../../utils/calculateQuotationAmount";
+import formatDate from "../../../utils/formatDate";
+import ErrorMessage from "../../../components/ui/ErrorMessage";
 
 const QuotationForm = () => {
+  const {
+    handleCreateQuotation,
+    error,
+  } = useContext(QuotationContext);
+
+  const { clients } =
+    useContext(ClientContext);
+
   const navi = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
   const [mobilePopup, setMobilePopup] = useState(false);
-  const [time, setTime] = useState(getCurrentDateTime());
-  const { quotations, setQuotations } = useContext(QuotationContext);
-  const { clients, setClients } = useContext(ClientContext);
   const [isNewClient, setIsNewClient] = useState(false);
   const [formData, setFormData] = useState({
     cliId: "",
     cliName: "",
     mobile: "",
     whatsapp: "",
-    amount: "",
     materials: Array(6).fill().map(() => ({
       size: "",
-      pic: "",
-      gej: "",
+      piece: "",
+      gauge: "",
     })),
     rateB1: "",
     rateB2: "",
@@ -50,17 +54,9 @@ const QuotationForm = () => {
     add: "",
     status: "PENDING",
   });
-
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(getCurrentDateTime());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const total = calculateAmount(formData);
-  const finalAmount = formData.amount || total;
+  const [time] = useState(
+    formatDate(new Date())
+  );
 
   const handleMaterialChange = (index, field, value) => {
     const updatedMaterials = [...formData.materials];
@@ -82,8 +78,8 @@ const QuotationForm = () => {
         ...formData.materials,
         {
           size: "",
-          gej: "",
-          pic: "",
+          gauge: "",
+          piece: "",
         },
       ],
     });
@@ -106,82 +102,41 @@ const QuotationForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit =
+    async (e) => {
 
-    if (!formData.cliName || !formData.cliName.trim()) {
-      alert("Please enter client name");
-      return;
-    }
+      e.preventDefault();
 
-    let finalCliId = formData.cliId;
-    let index = -1;
+      if (
+        !formData.cliName ||
+        !formData.cliName.trim()
+      ) {
 
-    if (formData.cliId) {
-      index = clients.findIndex(
-        (c) => Number(c.cliId) === Number(formData.cliId)
-      );
-    } 
-    else if (formData.mobile) {
-      index = clients.findIndex(
-        (c) => {
-          c.mobile === formData.mobile
-          c.whatsapp === formData.whatsapp
-        }
-      );
-    }
+        alert(
+          "Please enter client name"
+        );
 
-    if (index === -1) {
-      finalCliId = Date.now();
+        return;
+      }
 
-      const newClient = {
-        cliId: finalCliId,
-        cliName: formData.cliName,
-        mobile: formData.mobile,
-        whatsapp: formData.whatsapp,
-        dateOfJoin: getCurrentDateTime(),
-      };
+      const response =
+        await handleCreateQuotation({
+          ...formData,
 
-      setClients([newClient, ...clients]);
-    }
-    else {
-      finalCliId = clients[index].cliId;
-    }
+          laserCutting:
+            formData.laserCutting || "",
 
-    const newQuotation = {
-      ...formData,
-      id: Date.now(),
-      cliId: Number(finalCliId),
-      status: "PENDING",
-      quotationDate: getCurrentDateTime(),
-      amount: finalAmount,
-      whatsapp: formData.whatsapp || "",
-      laserCutting: formData.laserCutting || "",
+          whatsapp:
+            formData.whatsapp || "",
+
+          status: "PENDING",
+        });
+
+      if (response.success) {
+        setShowPopup(true);
+      }
     };
 
-    setQuotations([newQuotation, ...quotations]);
-
-    const quotationEntry = {
-      id: newQuotation.id,
-      date: newQuotation.quotationDate,
-      materials: newQuotation.materials,
-      amount: newQuotation.amount,
-      dateOfQuotation: newQuotation.quotationDate,
-    };
-
-    if (index !== -1) {
-      const updatedClients = [...clients];
-
-      updatedClients[index].quotationList = [
-        ...(updatedClients[index].quotationList || []),
-        quotationEntry,
-      ];
-
-      setClients(updatedClients);
-    }
-
-    setShowPopup(true);
-  };
   const handleWhatsApp = () => {
     if (!formData.whatsapp) {
       setMobilePopup(true);
@@ -195,18 +150,21 @@ const QuotationForm = () => {
     }
 
     const materialsText = formData.materials
-      .filter(m => m.nameOfMaterial)
-      .map(m => `• ${m.nameOfMaterial} (${m.pic} * ${m.qty})`)
-      .join("\n");
+      .filter(
+        (m) =>
+          m.size ||
+          m.piece ||
+          m.gauge
+      ).map(
+        (m, index) =>
+          `• ${index + 1}. ${m.size || "-"} (${m.piece || 0} pcs | ${m.gauge || "-"} gauge)`
+      ).join("\n");
 
     const message =
       `Hello ${formData.cliName},
 
 Your quotation: 
 ${materialsText}
-
-Amount: ${total}
-Date: ${getCurrentDateTime()}
 
 Thank you!`;
 
@@ -225,6 +183,10 @@ Thank you!`;
         bgcolor: "white",
       }}
     >
+      <ErrorMessage
+        message={error}
+      />
+
       <Box component="form" onSubmit={handleSubmit}>
 
         {/* Top Buttons */}
@@ -305,14 +267,15 @@ Thank you!`;
                     });
                   } else {
                     const selectedClient = clients.find(
-                      (c) => Number(c.cliId) === Number(value)
+                      (c) =>
+                        String(c.cliId) === String(value)
                     );
 
                     if (!selectedClient) return;
 
                     setFormData({
                       ...formData,
-                      cliId: Number(value), // ✅ FIX
+                      cliId: value, // ✅ FIX
                       cliName: selectedClient.cliName,
                       mobile: selectedClient.mobile,
                       whatsapp: selectedClient.whatsapp,
@@ -428,7 +391,7 @@ Thank you!`;
 
               <TableBody>
                 {formData.materials.map((row, i) => {
-                  const isRowFilled = row.size || row.gej || row.pic;
+                  const isRowFilled = row.size || row.gauge || row.piece;
 
                   return (
                     <TableRow key={i}>
@@ -446,9 +409,9 @@ Thank you!`;
 
                       <TableCell>
                         <Input
-                          inpValue={row.pic}
+                          inpValue={row.piece}
                           onChange={(e) => {
-                            handleMaterialChange(i, "pic", e.target.value)
+                            handleMaterialChange(i, "piece", e.target.value)
                           }}
                           isReq={isRowFilled}
                         />
@@ -456,9 +419,9 @@ Thank you!`;
 
                       <TableCell>
                         <Input
-                          inpValue={row.gej}
+                          inpValue={row.gauge}
                           onChange={(e) => {
-                            handleMaterialChange(i, "gej", e.target.value)
+                            handleMaterialChange(i, "gauge", e.target.value)
                           }}
                           isReq={isRowFilled}
                         />
@@ -565,26 +528,6 @@ Thank you!`;
                     inpName="laserCutting"
                     inpValue={formData.laserCutting}
                     onChange={handleChange}
-                  />
-                </Box>
-              </Box>
-
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography sx={{ width: "40%" }}>
-                  Quotation Amount:
-                </Typography>
-
-                <Box sx={{ width: "60%" }}>
-                  <Input
-                    inpName="amount"
-                    onChange={handleChange}
-                    readOnly
                   />
                 </Box>
               </Box>

@@ -1,6 +1,15 @@
-# 📁 Project Structure
+# 📁 Frontend Project Structure
 
 ## src/
+
+### 📁 api/
+
+- axios.js
+- clientApi.js
+- inventoryApi.js
+- quotationApi.js
+
+---
 
 ### 📁 components/
 
@@ -10,7 +19,10 @@
 
 - 📁 ui/
   - Button.jsx
+  - ErrorMessage.jsx
   - Input.jsx
+  - Loader.jsx
+  - PageLoader.jsx
   - Popup.jsx
 
 ---
@@ -67,9 +79,16 @@
 
 ---
 
+### 📁 hooks/
+
+- useApiError.js
+- useLoading.js
+
+---
+
 ### 📁 main-layout/
 
-- DashboardLayout.jsx
+- Layout.jsx
 
 ---
 
@@ -81,7 +100,5 @@
 
 ### 📁 utils/
 
-- caculateQuotationAmount.js
-- getCurrentDateAndTime.js
+- formatDate.js
 - handleDownloadPDF.js
-- localStorage.js
