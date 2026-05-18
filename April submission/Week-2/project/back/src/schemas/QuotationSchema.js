@@ -46,7 +46,9 @@ const quotationSchema =
         default: Date.now,
       },
 
-      materials: [materialSchema],
+      materials: [
+        materialSchema
+      ],
 
       rateB1: String,
 
@@ -63,20 +65,20 @@ const quotationSchema =
         enum: [
           "PENDING",
           "CONFIRM",
-          "REJECTED",
-          "COMPLETED",
         ],
         default: "PENDING",
       },
+
+      isSynced: {
+        type: Boolean,
+        default: false,
+      },
+
+      lastSyncedAt: Date,
     },
     {
       timestamps: true,
     }
   );
 
-const Quotation = mongoose.model(
-  "Quotation",
-  quotationSchema
-);
-
-export default Quotation;
+export default quotationSchema;

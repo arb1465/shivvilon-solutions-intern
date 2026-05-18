@@ -1,4 +1,9 @@
-import Client from "../models/Client.js";
+import Client
+  from "../models/local/Client.js";
+
+import {
+  syncAfterLocalSave,
+} from "./syncService.js";
 
 export const createClientService =
   async (data) => {
@@ -14,19 +19,27 @@ export const createClientService =
       );
     }
 
-    return await Client.create({
-      cliId: `CLI_${Date.now()}`,
+    const client =
+      await Client.create({
+        cliId: `CLI_${Date.now()}`,
 
-      cliName: data.cliName,
+        cliName: data.cliName,
 
-      mobile: data.mobile,
+        mobile: data.mobile,
 
-      whatsapp: data.whatsapp,
+        whatsapp: data.whatsapp,
 
-      dateOfJoin: new Date(),
+        dateOfJoin: new Date(),
 
-      quotationList: [],
-    });
+        quotationList: [],
+      });
+
+    await syncAfterLocalSave(
+      client,
+      "client"
+    );
+
+    return client;
   };
 
 export const getAllClientsService =
@@ -68,6 +81,11 @@ export const updateClientService =
         {
           new: true,
         }
+      );
+
+      await syncAfterLocalSave(
+        updatedClient,
+        "client"
       );
 
     return updatedClient;

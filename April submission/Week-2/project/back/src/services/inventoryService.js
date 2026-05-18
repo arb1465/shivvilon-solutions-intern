@@ -1,4 +1,9 @@
-import Inventory from "../models/Inventory.js";
+import Inventory
+  from "../models/local/Inventory.js";
+
+import {
+  syncAfterLocalSave,
+} from "./syncService.js";
 
 export const upsertInventoryService = async (data) => {
   const {
@@ -7,11 +12,6 @@ export const upsertInventoryService = async (data) => {
   } = data;
 
   const property = properties?.[0];
-
-  // console.log(
-  //   "SERVICE DATA:",
-  //   data
-  // );
 
   if (!property) {
     throw new Error(
@@ -57,11 +57,16 @@ export const upsertInventoryService = async (data) => {
 
     await existingInventory.save();
 
+    await syncAfterLocalSave(
+      existingInventory,
+      "inventory"
+    );
+
     return existingInventory;
   }
 
   // NEW INVENTORY
-  if ( property.quantity <= property.minQuantity) {
+  if (property.quantity <= property.minQuantity) {
     property.status = "LOW";
   }
 
@@ -80,6 +85,11 @@ export const upsertInventoryService = async (data) => {
 
       properties: [property],
     });
+
+  await syncAfterLocalSave(
+    newInventory,
+    "inventory"
+  );
 
   return newInventory;
 };
@@ -128,6 +138,11 @@ export const deletePropertyService =
       );
 
     await inventory.save();
+
+    await syncAfterLocalSave(
+      inventory,
+      "inventory"
+    );
 
     return inventory;
   };

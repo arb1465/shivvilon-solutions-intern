@@ -1,36 +1,45 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import app from "./app.js";
 
-import connectDB from "./config/db.js";
+import envConfig
+from "./config/envConfig.js";
 
-const PORT =
-  process.env.PORT || 5000;
+import startSyncJob
+from "./jobs/syncJob.js";
 
-const startServer = async () => {
+// INITIALIZE DB CONNECTIONS
 
-  try {
+import "./config/localDb.js";
+import "./config/atlasDb.js";
 
-    await connectDB();
+const PORT = envConfig.PORT || 5000;
 
-    app.listen(PORT, () => {
 
-      console.log(
-        `Server running on port ${PORT}`
+const startServer =
+  async () => {
+
+    try {
+
+      app.listen(
+        PORT,
+
+        () => {
+
+          console.log(
+            `Server running on port ${PORT}`
+          );
+
+          startSyncJob();
+        }
       );
 
-    });
+    } catch (error) {
 
-  } catch (error) {
+      console.log(
+        "Server Startup Failed"
+      );
 
-    console.log(
-      "Server Startup Failed"
-    );
-
-    console.log(error);
-
-  }
-};
+      console.log(error);
+    }
+  };
 
 startServer();

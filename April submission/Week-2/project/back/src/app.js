@@ -1,28 +1,31 @@
 import express from "express";
 import cors from "cors";
 
-import quotationRoutes from "./routes/quotationRoutes.js";
 import clientRoutes from "./routes/clientRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
+import quotationRoutes from "./routes/quotationRoutes.js";
 
 const app = express();
 
 // MIDDLEWARES
 app.use(cors());
-
 app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 
-app.use(express.urlencoded({
-  extended: true,
-}));
 
 // HEALTH CHECK
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Backend Running",
+    message:
+      "Backend Running",
   });
 });
+
 
 // ROUTES
 app.use(
@@ -40,15 +43,26 @@ app.use(
   inventoryRoutes
 );
 
+
 // GLOBAL ERROR HANDLER
-app.use((err, req, res, next) => {
+app.use(
+  (
+    err,
+    req,
+    res,
+    next
+  ) => {
 
-  console.log(err);
+    console.log(
+      "GLOBAL ERROR:",
+      err
+    );
 
-  res.status(500).json({
-    success: false,
-    message: err.message,
-  });
-});
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+);
 
 export default app;

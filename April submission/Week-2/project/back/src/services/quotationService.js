@@ -1,5 +1,12 @@
-import Quotation from "../models/Quotation.js";
-import Client from "../models/Client.js";
+import Quotation
+  from "../models/local/Quotation.js";
+
+import Client
+  from "../models/local/Client.js";
+
+import {
+  syncAfterLocalSave,
+} from "./syncService.js";
 
 export const createQuotationService =
   async (data) => {
@@ -12,20 +19,26 @@ export const createQuotationService =
     // AUTO CREATE CLIENT
     if (!client) {
 
-      client = await Client.create({
-        cliId:
-          `CLI_${Date.now()}`,
+      client =
+        await Client.create({
+          cliId:
+            `CLI_${Date.now()}`,
 
-        cliName: data.cliName,
+          cliName: data.cliName,
 
-        mobile: data.mobile,
+          mobile: data.mobile,
 
-        whatsapp: data.whatsapp,
+          whatsapp: data.whatsapp,
 
-        dateOfJoin: new Date(),
+          dateOfJoin: new Date(),
 
-        quotationList: [],
-      });
+          quotationList: [],
+        });
+
+      await syncAfterLocalSave(
+        client,
+        "client"
+      );
     }
 
     // GENERATE QUOTATION NUMBER
@@ -64,6 +77,11 @@ export const createQuotationService =
           data.status || "PENDING",
       });
 
+    await syncAfterLocalSave(
+      quotation,
+      "quotation"
+    );
+
     // UPDATE CLIENT SUMMARY CACHE
     client.quotationList.push({
       quotationNo,
@@ -78,6 +96,11 @@ export const createQuotationService =
     });
 
     await client.save();
+
+    await syncAfterLocalSave(
+      client,
+      "client"
+    );
 
     return quotation;
   };
@@ -98,7 +121,7 @@ export const getSingleQuotationService =
   };
 
 export const updateQuotationService =
-  async ( quotationNo, data ) => {
+  async (quotationNo, data) => {
 
     const updatedQuotation =
       await Quotation.findOneAndUpdate(
@@ -151,6 +174,16 @@ export const updateQuotationService =
         );
 
       await client.save();
+
+      await syncAfterLocalSave(
+        updatedQuotation,
+        "quotation"
+      );
+
+      await syncAfterLocalSave(
+        client,
+        "client"
+      );
     }
 
     return updatedQuotation;
@@ -191,6 +224,11 @@ export const deleteQuotationService =
         );
 
       await client.save();
+
+      await syncAfterLocalSave(
+        client,
+        "client"
+      );
     }
 
     return quotation;
