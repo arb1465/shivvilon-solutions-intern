@@ -22,6 +22,8 @@ import { handleDownloadPDF } from "../../../utils/handleDownloadPDF";
 import { useLocation } from "react-router-dom";
 import PageLoader from "../../../components/ui/PageLoader"
 import formatDate from "../../../utils/formatDate"
+import QuotationPdfTemplate from "../components/QuotationPdfTemplate";
+import Popup from "../../../components/ui/Popup"
 
 const QuotationDetail = () => {
   const location = useLocation();
@@ -31,20 +33,25 @@ const QuotationDetail = () => {
   } = useContext(QuotationContext);
   const { id } = useParams();
   const [isEditing, setIsEditing] = useState(false);
+  const [warningPopup, setWarningPopup] = useState({
 
+    open: false,
+
+    message: "",
+  });
   const navi = useNavigate();
   const pdfRef = useRef();
 
   const [isGenerating, setIsGenerating] = useState(false);
   const quotation =
-  quotations.find(
-    (q) =>
-      String(q.quotationNo) === String(id)
-  );
+    quotations.find(
+      (q) =>
+        String(q.quotationNo) === String(id)
+    );
   const [editData, setEditData] = useState(null);
   const [time] = useState(
-      formatDate(new Date())
-    );
+    formatDate(new Date())
+  );
 
   useEffect(() => {
     if (quotation) {
@@ -90,7 +97,13 @@ const QuotationDetail = () => {
 
   const handleWhatsApp = () => {
     if (!editData?.whatsapp) {
-      alert("Please add WhatsApp number");
+      setWarningPopup({
+
+        open: true,
+
+        message:
+          "Please add WhatsApp number",
+      });
       return;
     }
 
@@ -150,7 +163,7 @@ const QuotationDetail = () => {
   if (!quotation || !editData) {
     return <PageLoader />;
   }
-  
+
   if (!quotation) return <Box p={3}>Quotation Not Found</Box>;
 
   return (
@@ -205,15 +218,20 @@ const QuotationDetail = () => {
               btnName={isGenerating ? "Generating PDF..." : "Download"}
               btnColor="red"
               onClick={async () => {
+
                 setIsGenerating(true);
 
                 try {
+
                   await handleDownloadPDF({
                     pdfRef,
                     data: editData,
                   });
+
                 }
+
                 finally {
+
                   setIsGenerating(false);
                 }
               }}
@@ -224,7 +242,7 @@ const QuotationDetail = () => {
         </Box>
 
         {/* MAIN CONTAINER (MATCHED) */}
-        <Box ref={pdfRef} >
+        <Box>
 
           {/* Client + Date (MATCHED) */}
           <Box
@@ -398,6 +416,58 @@ const QuotationDetail = () => {
             </Box>
           </Box>
         </Box>
+
+      </Box>
+
+      <Popup
+        isOpen={
+          warningPopup.open
+        }
+
+        title="Requirement"
+
+        message={
+          warningPopup.message
+        }
+
+        onConfirm={() =>
+          setWarningPopup({
+
+            open: false,
+
+            message: "",
+          })
+        }
+
+        onCancel={() =>
+          setWarningPopup({
+
+            open: false,
+
+            message: "",
+          })
+        }
+      />
+
+      <Box
+        sx={{
+          position: "fixed",
+
+          top: 0,
+          left: 0,
+
+          visibility: "hidden",
+
+          pointerEvents: "none",
+
+          zIndex: -1,
+        }}
+      >
+
+        <QuotationPdfTemplate
+          ref={pdfRef}
+          data={editData}
+        />
 
       </Box>
 

@@ -18,11 +18,20 @@ import Input from "../../../components/ui/Input";
 import Button from "../../../components/ui/Button";
 import Popup from "../../../components/ui/Popup";
 import { useNavigate } from "react-router-dom";
-import { useState, useContext } from "react";
+import { useState, useContext, useRef, useEffect } from "react";
 import { QuotationContext } from "../../../contexts/quotation/quotationContext";
 import { ClientContext } from "../../../contexts/client/clientContext"
 import formatDate from "../../../utils/formatDate";
 import ErrorMessage from "../../../components/ui/ErrorMessage";
+import {
+  handleDownloadPDF,
+} from "../../../utils/handleDownloadPDF";
+import {
+  uploadQuotationPdf,
+} from "../../../api/settingsApi";
+
+import QuotationPdfTemplate
+  from "../components/QuotationPdfTemplate";
 
 const QuotationForm = () => {
   const {
@@ -33,9 +42,15 @@ const QuotationForm = () => {
   const { clients } =
     useContext(ClientContext);
 
+  const [createdQuotation, setCreatedQuotation] = useState(null);
+  const pdfRef = useRef();
   const navi = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
   const [mobilePopup, setMobilePopup] = useState(false);
+  const [duplicatePopup, setDuplicatePopup] = useState({
+    open: false,
+    message: "",
+  });
   const [isNewClient, setIsNewClient] = useState(false);
   const [formData, setFormData] = useState({
     cliId: "",
@@ -57,6 +72,64 @@ const QuotationForm = () => {
   const [time] = useState(
     formatDate(new Date())
   );
+
+
+  useEffect(() => {
+
+    const autoSavePdf =
+      async () => {
+
+        if (
+          !createdQuotation ||
+          !pdfRef.current
+        ) {
+          return;
+        }
+
+        try {
+
+          const pdfBlob =
+            await handleDownloadPDF({
+              pdfRef,
+              data:
+                createdQuotation,
+              shouldDownload: false,
+            });
+
+          const formDataObj =
+            new FormData();
+
+          formDataObj.append(
+            "pdf",
+            pdfBlob,
+            `${createdQuotation.quotationNo}.pdf`
+          );
+
+          formDataObj.append(
+            "quotationNo",
+            createdQuotation.quotationNo
+          );
+
+          await uploadQuotationPdf(
+            formDataObj
+          );
+
+          console.log(
+            "PDF Saved Successfully"
+          );
+
+        } catch (error) {
+
+          console.log(
+            "Auto PDF Save Error:",
+            error
+          );
+        }
+      };
+
+    autoSavePdf();
+
+  }, [createdQuotation]);
 
   const handleMaterialChange = (index, field, value) => {
     const updatedMaterials = [...formData.materials];
@@ -111,10 +184,14 @@ const QuotationForm = () => {
         !formData.cliName ||
         !formData.cliName.trim()
       ) {
+        
+        setDuplicatePopup({
 
-        alert(
-          "Please enter client name"
-        );
+          open: true,
+
+          message:
+            "Please enter client name",
+        });
 
         return;
       }
@@ -133,7 +210,20 @@ const QuotationForm = () => {
         });
 
       if (response.success) {
+
+        setCreatedQuotation(
+          response.data
+        );
+
         setShowPopup(true);
+
+      }
+      else {
+        setDuplicatePopup({
+          open: true,
+          message:
+            response.message,
+        });
       }
     };
 
@@ -546,30 +636,84 @@ Thank you!`;
             કટિંગ કરેલ માલ પાછો રાખવા માં નહિ આવે
           </Typography>
         </Box>
-
-        {/* Popup */}
-        <Popup
-          isOpen={showPopup}
-          title="Confirm Action"
-          message={`Are you sure to send the Quotation to ${formData.cliName}?`}
-          onConfirm={() => {
-            navi("/quotations");
-            setShowPopup(false);
-          }}
-          onCancel={() => setShowPopup(false)}
-        />
-
-        <Popup
-          isOpen={mobilePopup}
-          title="Requirement"
-          message="Please add 10 digit WhatsApp number"
-          onConfirm={() => {
-            navi("/quotations/send-quotation");
-            setMobilePopup(false);
-          }}
-          onCancel={() => setMobilePopup(false)}
-        />
       </Box>
+
+      {/* Popup */}
+      <Popup
+        isOpen={showPopup}
+        title="Confirm Action"
+        message={`Are you sure to send the Quotation to ${formData.cliName}?`}
+        onConfirm={() => {
+          navi("/quotations");
+          setShowPopup(false);
+        }}
+        onCancel={() => setShowPopup(false)}
+      />
+
+      <Popup
+        isOpen={mobilePopup}
+        title="Requirement"
+        message="Please add 10 digit WhatsApp number"
+        onConfirm={() => {
+          navi("/quotations/send-quotation");
+          setMobilePopup(false);
+        }}
+        onCancel={() => setMobilePopup(false)}
+      />
+
+      <Popup
+        isOpen={
+          duplicatePopup.open
+        }
+
+        title="Duplicate Mobile Number"
+
+        message={
+          duplicatePopup.message
+        }
+
+        onConfirm={() =>
+          setDuplicatePopup({
+
+            open: false,
+
+            message: "",
+          })
+        }
+
+        onCancel={() =>
+          setDuplicatePopup({
+
+            open: false,
+
+            message: "",
+          })
+        }
+      />
+
+      {createdQuotation && (
+        <Box
+          sx={{
+            position: "fixed",
+
+            top: 0,
+            left: 0,
+
+            visibility: "hidden",
+
+            pointerEvents: "none",
+
+            zIndex: -1,
+          }}
+        >
+
+          <QuotationPdfTemplate
+            ref={pdfRef}
+            data={createdQuotation}
+          />
+
+        </Box>
+      )}
     </Paper>
   );
 };

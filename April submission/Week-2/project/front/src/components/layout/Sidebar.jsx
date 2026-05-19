@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useContext} from "react";
 
 import {
   Drawer,
@@ -15,26 +15,21 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-
-import DashboardIcon
-from "@mui/icons-material/Dashboard";
-
-import ReceiptLongIcon
-from "@mui/icons-material/ReceiptLong";
-
-import InventoryIcon
-from "@mui/icons-material/Inventory";
-
-import GroupsIcon
-from "@mui/icons-material/Groups";
-
-import LogoutIcon
-from "@mui/icons-material/Logout";
-
 import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
+
+import {
+  AuthContext,
+} from "../../contexts/auth/AuthContext";
+
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import GroupsIcon from "@mui/icons-material/Groups";
+import LogoutIcon from "@mui/icons-material/Logout";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 const expandedWidth = 220;
 const collapsedWidth = 70;
@@ -64,6 +59,12 @@ const navItems = [
     path: "/inventories",
     icon: <InventoryIcon />,
   },
+
+  {
+    label: "Settings",
+    path: "/settings",
+    icon: <SettingsIcon />,
+  },
 ];
 
 const Sidebar = ({
@@ -86,6 +87,12 @@ const Sidebar = ({
 
   const navigate =
     useNavigate();
+
+  const {
+    logout,
+  } = useContext(
+    AuthContext
+  );
 
   const shouldShowText =
     isMobile || showText;
@@ -126,7 +133,7 @@ const Sidebar = ({
               variant="h6"
               fontWeight="bold"
             >
-              Shivvilon
+              Shivvilon Solutions
             </Typography>
 
             <Typography
@@ -167,100 +174,114 @@ const Sidebar = ({
 
             return (
 
-              <ListItemButton
+              <React.Fragment
                 key={item.path}
-
-                onClick={() =>
-                  navigate(
-                    item.path
-                  )
-                }
-
-                disableRipple
-
-                sx={{
-                  width: "100%",
-
-                  px:
-                    shouldShowText
-                      ? 3
-                      : 1.5,
-
-                  py: 1.5,
-
-                  justifyContent:
-                    shouldShowText
-                      ? "flex-start"
-                      : "center",
-
-                  color: isActive
-                    ? "primary.main"
-                    : "text.secondary",
-
-                  transition:
-                    "all 0.2s ease",
-
-                  ...(isActive && {
-
-                    bgcolor:
-                      "#dbe4ff",
-
-                    fontWeight: 600,
-
-                    borderRight:
-                      "4px solid #162660",
-                  }),
-
-                  "&:hover": {
-
-                    bgcolor:
-                      "#eef2ff",
-
-                    color:
-                      "primary.main",
-                  },
-
-                  "& .MuiListItemIcon-root": {
-
-                    color:
-                      "inherit",
-
-                    minWidth: 0,
-
-                    mr:
-                      shouldShowText
-                        ? 2
-                        : 0,
-
-                    justifyContent:
-                      "center",
-                  },
-                }}
               >
 
-                <ListItemIcon>
-                  {item.icon}
-                </ListItemIcon>
+                {item.path ===
+                  "/settings" && (
 
-                {shouldShowText && (
+                    <Divider
+                      sx={{
+                        my: 1,
+                      }}
+                    />
+                  )}
 
-                  <ListItemText
-                    primary={
-                      item.label
-                    }
+                <ListItemButton
 
-                    primaryTypographyProps={{
-                      fontSize: 15,
+                  onClick={() =>
+                    navigate(
+                      item.path
+                    )
+                  }
 
-                      fontWeight:
-                        isActive
-                          ? 600
-                          : 500,
-                    }}
-                  />
-                )}
+                  disableRipple
 
-              </ListItemButton>
+                  sx={{
+                    width: "100%",
+
+                    px:
+                      shouldShowText
+                        ? 3
+                        : 1.5,
+
+                    py: 1.5,
+
+                    justifyContent:
+                      shouldShowText
+                        ? "flex-start"
+                        : "center",
+
+                    color: isActive
+                      ? "primary.main"
+                      : "text.secondary",
+
+                    transition:
+                      "all 0.2s ease",
+
+                    ...(isActive && {
+
+                      bgcolor:
+                        "#dbe4ff",
+
+                      fontWeight: 600,
+
+                      borderRight:
+                        "4px solid #162660",
+                    }),
+
+                    "&:hover": {
+
+                      bgcolor:
+                        "#eef2ff",
+
+                      color:
+                        "primary.main",
+                    },
+
+                    "& .MuiListItemIcon-root": {
+
+                      color:
+                        "inherit",
+
+                      minWidth: 0,
+
+                      mr:
+                        shouldShowText
+                          ? 2
+                          : 0,
+
+                      justifyContent:
+                        "center",
+                    },
+                  }}
+                >
+
+                  <ListItemIcon>
+                    {item.icon}
+                  </ListItemIcon>
+
+                  {shouldShowText && (
+
+                    <ListItemText
+                      primary={
+                        item.label
+                      }
+
+                      primaryTypographyProps={{
+                        fontSize: 15,
+
+                        fontWeight:
+                          isActive
+                            ? 600
+                            : 500,
+                      }}
+                    />
+                  )}
+
+                </ListItemButton>
+              </React.Fragment>
             );
           }
         )}
@@ -280,9 +301,12 @@ const Sidebar = ({
       <Box sx={{ p: 1 }}>
 
         <ListItemButton
-          onClick={() =>
-            navigate("/")
-          }
+          onClick={() => {
+
+            logout();
+
+            navigate("/");
+          }}
 
           sx={{
             px:

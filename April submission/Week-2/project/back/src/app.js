@@ -4,6 +4,8 @@ import cors from "cors";
 import clientRoutes from "./routes/clientRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import quotationRoutes from "./routes/quotationRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
 
@@ -41,6 +43,16 @@ app.use(
 app.use(
   "/api/inventories",
   inventoryRoutes
+);
+
+app.use(
+  "/api/settings",
+  settingsRoutes
+);
+
+app.use(
+  "/api/auth",
+  authRoutes
 );
 
 

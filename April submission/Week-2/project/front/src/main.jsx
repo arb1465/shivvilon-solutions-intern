@@ -6,7 +6,11 @@ import {
   ThemeProvider,
   createTheme,
 } from "@mui/material/styles";
-  
+import {
+  AuthProvider,
+} from "./contexts/auth/authContext.jsx";
+
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -38,7 +42,11 @@ ReactDOM.createRoot(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <App />
+      <AuthProvider>
+
+        <App />
+
+      </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>
 );

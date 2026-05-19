@@ -114,11 +114,6 @@ const InventoryForm = () => {
       ],
     };
 
-    console.log(
-      "FRONTEND PAYLOAD:",
-      payload
-    );
-
     const response =
       await handleUpsertInventory(
         payload

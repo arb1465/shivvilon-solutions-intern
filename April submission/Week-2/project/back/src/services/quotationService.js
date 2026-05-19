@@ -16,6 +16,32 @@ export const createQuotationService =
         mobile: data.mobile,
       });
 
+
+    // DUPLICATE MOBILE CHECK
+    if (client) {
+
+      const existingName =
+        client.cliName
+          .trim()
+          .toLowerCase();
+
+      const incomingName =
+        data.cliName
+          .trim()
+          .toLowerCase();
+
+      // SAME NUMBER BUT DIFFERENT NAME
+      if (
+        existingName !==
+        incomingName
+      ) {
+
+        throw new Error(
+          `Mobile number already belongs to '${client.cliName}'`
+        );
+      }
+    }
+
     // AUTO CREATE CLIENT
     if (!client) {
 

@@ -4,10 +4,13 @@
 
 ### 📁 api/
 
+- authApi.js
 - axios.js
 - clientApi.js
 - inventoryApi.js
 - quotationApi.js
+- settingsApi.js
+
 
 ---
 
@@ -25,9 +28,15 @@
   - PageLoader.jsx
   - Popup.jsx
 
+
 ---
 
 ### 📁 contexts/
+
+- 📁 auth/
+  - AuthContext.js
+  - authContext.jsx
+  - authReducer.js
 
 - 📁 client/
   - clientContext.js
@@ -40,6 +49,7 @@
 - 📁 quotation/
   - quotationContext.js
   - QuotationProvider.jsx
+
 
 ---
 
@@ -77,6 +87,10 @@
     - ShowQuotations.jsx
     - StatsCard.jsx
 
+- 📁 settings/
+  - SettingsArea.jsx
+
+
 ---
 
 ### 📁 hooks/
@@ -84,17 +98,29 @@
 - useApiError.js
 - useLoading.js
 
+
 ---
 
 ### 📁 main-layout/
 
 - Layout.jsx
 
+
 ---
 
 ### 📁 pages/
 
+- ForgotPassword.jsx
 - LoginPage.jsx
+- ResetPassword.jsx
+
+
+---
+
+### 📁 routes/
+
+- ProtectedRoute.jsx
+
 
 ---
 

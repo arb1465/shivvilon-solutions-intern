@@ -7,36 +7,37 @@ import {
   updateClient,
   deleteClient,
 } from "../controllers/clientController.js";
+import authMiddleware
+from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-
-// CREATE
 router.post(
   "/",
+  authMiddleware,
   createClient
 );
 
-// GET ALL
 router.get(
   "/",
+  authMiddleware,
   getAllClients
 );
 
-// GET SINGLE
 router.get(
   "/:id",
+  authMiddleware,
   getSingleClient
 );
 
-// UPDATE
 router.put(
   "/:id",
+  authMiddleware,
   updateClient
 );
 
-// DELETE
 router.delete(
   "/:id",
+  authMiddleware,
   deleteClient
 );
 

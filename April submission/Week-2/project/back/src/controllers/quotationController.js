@@ -6,6 +6,8 @@ import {
   deleteQuotationService,
 } from "../services/quotationService.js";
 
+import saveQuotationPdf from "../utils/saveQuotationPdf.js";
+
 export const createQuotation =
   async (req, res) => {
 
@@ -121,6 +123,63 @@ export const deleteQuotation =
       res.status(500).json({
         success: false,
         message: error.message,
+      });
+    }
+  };
+
+export const saveQuotationPdfController =
+  async (req, res) => {
+
+    try {
+
+      const pdfFile =
+        req.file;
+
+      const quotationNo =
+        req.body.quotationNo;
+
+      if (!pdfFile) {
+
+        return res.status(400).json({
+          success: false,
+
+          message:
+            "PDF file missing",
+        });
+      }
+
+      const result =
+        await saveQuotationPdf(
+
+          pdfFile.buffer,
+
+          quotationNo
+        );
+
+      if (!result.success) {
+
+        return res.status(400).json({
+          success: false,
+
+          message:
+            result.message,
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+
+        filePath:
+          result.filePath,
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        success: false,
+
+        message:
+          error.message,
       });
     }
   };

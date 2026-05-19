@@ -1,7 +1,9 @@
 import checkInternet from "../utils/checkInternet.js";
+import LocalSettings from "../models/local/Settings.js";
 import AtlasClient from "../models/atlas/Client.js";
 import AtlasInventory from "../models/atlas/Inventory.js";
 import AtlasQuotation from "../models/atlas/Quotation.js";
+import AtlasSettings from "../models/atlas/Settings.js";
 
 const syncDocument =
   async (
@@ -157,6 +159,21 @@ export const syncAfterLocalSave =
           localDoc,
           AtlasQuotation,
           "quotationNo"
+        );
+      }
+
+      if (type === "settings") {
+
+        await syncPendingData(
+          LocalSettings,
+          AtlasSettings,
+          "_id"
+        );
+
+        await syncDocument(
+          localDoc,
+          AtlasSettings,
+          "_id"
         );
       }
 

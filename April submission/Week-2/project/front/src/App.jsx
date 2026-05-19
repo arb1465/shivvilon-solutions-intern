@@ -5,7 +5,12 @@ import {
 } from "react-router-dom";
 
 import Layout from "./main-layout/Layout";
+
 import LoginPage from "./pages/LoginPage";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+
+import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 
 import ClientArea from "./features/clients/ClientArea";
 import ClientDetail from "./features/clients/components/ClientDetail";
@@ -17,10 +22,12 @@ import PaymentArea from "./features/payment/PaymentArea";
 import QuotationArea from "./features/quotation/QuotationArea";
 import QuotationForm from "./features/quotation/components/QuotationForm";
 import QuotationDetail from "./features/quotation/components/QuotationDetail";
+import SettingsArea from "./features/settings/SettingsArea";
 
 import QuotationProvider from "./contexts/quotation/QuotationProvider";
 import InventoryProvider from "./contexts/inventory/InventoryProvider";
 import ClientProvider from "./contexts/client/ClientProvider";
+
 
 function App() {
   return (
@@ -33,8 +40,22 @@ function App() {
           element={<LoginPage />}
         />
 
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword />}
+        />
+
+        <Route
+          path="/reset-password"
+          element={<ResetPassword />}
+        />
+
         {/* MAIN LAYOUT */}
-        <Route element={<Layout />}>
+        <Route element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }>
 
           {/* DASHBOARD */}
           <Route
@@ -141,6 +162,12 @@ function App() {
                 </ClientProvider>
               </QuotationProvider>
             }
+          />
+
+
+          <Route
+            path="/settings"
+            element={<SettingsArea />}
           />
 
         </Route>

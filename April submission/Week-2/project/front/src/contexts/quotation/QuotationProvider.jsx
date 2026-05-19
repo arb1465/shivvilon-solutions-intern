@@ -15,10 +15,10 @@ import {
 } from "../../api/quotationApi";
 
 import useLoading
-from "../../hooks/useLoading";
+  from "../../hooks/useLoading";
 
 import useApiError
-from "../../hooks/useApiError";
+  from "../../hooks/useApiError";
 
 const QuotationProvider = ({
   children,
@@ -127,7 +127,7 @@ const QuotationProvider = ({
         setQuotations((prev) =>
           prev.map((q) =>
             q.quotationNo ===
-            quotationNo
+              quotationNo
               ? response.data
               : q
           )
@@ -176,13 +176,36 @@ const QuotationProvider = ({
 
       } catch (err) {
 
-        setError(
+        const errorMessage =
+
           err.response?.data?.message ||
-          "Failed to delete quotation"
-        );
+
+          "Failed to create quotation";
+
+
+        // ONLY FOR REAL SERVER ERRORS
+        if (
+
+          !errorMessage.includes(
+            "Mobile number already belongs"
+          )
+        ) {
+
+          setError(
+            errorMessage
+          );
+        }
 
         return {
+
           success: false,
+
+          message:
+            err.response?.data?.message ||
+
+            err.message ||
+
+            "Failed to create quotation",
         };
       }
     };
