@@ -11,11 +11,6 @@ const UserSchema =
       unique: true,
     },
 
-    name: {
-      type: String,
-      required: true,
-    },
-
     email: {
       type: String,
       required: true,
@@ -35,6 +30,15 @@ const UserSchema =
     otpExpiry: {
       type: Date,
     },
+
+    isSynced: {
+      type: Boolean,
+      default: false
+    },
+
+    lastSyncedAt: {
+      type: Date
+    }
 
   }, {
     timestamps: true,

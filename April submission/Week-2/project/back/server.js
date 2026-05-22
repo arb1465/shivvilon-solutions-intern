@@ -1,16 +1,30 @@
 import app from "./src/app.js";
 
-import envConfig from "./src/config/envConfig.js";
-import startSyncJob from "./src/jobs/syncJob.js";
+import envConfig
+  from "./src/config/envConfig.js";
+
+import startSyncJob
+  from "./src/jobs/syncJob.js";
 
 
 // INITIALIZE DB CONNECTIONS
 
 import "./src/config/localDb.js";
+
 import "./src/config/atlasDb.js";
 
 
-const PORT = envConfig.PORT || 5000;
+// DEFAULT USER SEED
+
+import User
+  from "./src/models/local/User.js";
+
+import bcrypt
+  from "bcryptjs";
+
+
+const PORT =
+  envConfig.PORT || 5000;
 
 
 console.log(
@@ -19,10 +33,71 @@ console.log(
 );
 
 
+// CREATE DEFAULT ADMIN
+
+const seedDefaultUser =
+  async () => {
+
+    try {
+
+      const existingUser =
+        await User.findOne({
+
+          email:
+            "admin@gmail.com"
+        });
+
+      if (!existingUser) {
+
+        const hashedPassword =
+          await bcrypt.hash(
+            "admin123",
+            10
+          );
+
+        await User.create({
+          userId: "ADMIN001",
+
+          email:
+            "admin@gmail.com",
+
+          password:
+            hashedPassword,
+
+        });
+
+        console.log(
+          "Default Admin Created"
+        );
+      }
+
+    } catch (error) {
+
+      console.log(
+        "Default User Seed Failed"
+      );
+
+      console.log(error);
+    }
+  };
+
+
+// START SERVER
+
 const startServer =
   async () => {
 
     try {
+
+      setTimeout(
+        async () => {
+
+          await seedDefaultUser();
+
+        },
+        3000
+      );
+
 
       app.listen(
 
