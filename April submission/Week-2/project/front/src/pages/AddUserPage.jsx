@@ -1,4 +1,5 @@
-import {
+import React,
+{
   useState,
 } from "react";
 
@@ -9,8 +10,13 @@ import {
   Stack,
 } from "@mui/material";
 
+
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+
 import {
-  useLocation,
   useNavigate,
 } from "react-router-dom";
 
@@ -24,20 +30,12 @@ import Popup
   from "../components/ui/Popup";
 
 import {
-  resetPassword,
+  createUser,
 } from "../api/authApi";
 
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import IconButton from "@mui/material/IconButton";
-import TextField from "@mui/material/TextField";
 
-
-const ResetPassword =
+const AddUserPage =
   () => {
-
-    const location =
-      useLocation();
 
     const navi =
       useNavigate();
@@ -45,29 +43,37 @@ const ResetPassword =
     const [showPassword, setShowPassword] =
       useState(false);
 
-    const email =
-      location.state?.email || "";
-
-
-    const [formData, setFormData] =
+    const [formData,
+      setFormData] =
       useState({
-        otp: "",
+
+        name: "",
+
+        email: "",
+
         password: "",
       });
 
 
-    const [popup, setPopup] =
+    const [popup,
+      setPopup] =
       useState({
+
         open: false,
+
         title: "",
+
         message: "",
       });
+
 
     const handleChange =
       (e) => {
 
         setFormData({
+
           ...formData,
+
           [e.target.name]:
             e.target.value,
         });
@@ -80,13 +86,10 @@ const ResetPassword =
         e.preventDefault();
 
         const response =
-          await resetPassword({
-            email,
-            otp:
-              formData.otp,
-            password:
-              formData.password,
-          });
+          await createUser(
+            formData
+          );
+
 
         if (response.success) {
 
@@ -97,13 +100,14 @@ const ResetPassword =
             title: "Success",
 
             message:
-              "Password updated successfully.\n\nClick OK to continue.",
+              "User created successfully.\n\nClick OK to continue.",
           });
-
         }
+
         else {
 
           setPopup({
+
             open: true,
 
             title: "Error",
@@ -115,14 +119,23 @@ const ResetPassword =
         }
       };
 
+
     return (
 
       <Box
         sx={{
-          minHeight: "100vh",
+
+          minHeight:
+            "100vh",
+
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+
+          justifyContent:
+            "center",
+
+          alignItems:
+            "center",
+
           background:
             "linear-gradient(135deg, #eef2ff, #f8fafc)",
         }}
@@ -130,60 +143,113 @@ const ResetPassword =
 
         <Paper
           sx={{
-            p: 4,
+
             width: "100%",
+
             maxWidth: 450,
+
+            p: 4,
+
+            borderRadius: 3,
           }}
         >
 
           <Typography
-            variant="h4"
+            variant="h5"
+
             fontWeight="bold"
+
+            mb={4}
+
             textAlign="center"
           >
-            Reset Password
+            Add New User
           </Typography>
 
 
           <Box
             component="form"
-            onSubmit={handleSubmit}
-            sx={{ marginTop: "40px" }}
+            sx={{ marginTop: "30px" }}
+            onSubmit={
+              handleSubmit
+            }
           >
 
             <Stack spacing={3}>
 
               <Box>
 
-
                 <Typography
                   variant="body2"
                   sx={{
-                    mb: 1,
+                    marginBottom: "9px"
                   }}
                 >
-                  Enter OTP
+                  New User's Name
                 </Typography>
 
                 <Input
-                  inpName="otp"
-                  inpPlaceholder="Enter OTP"
-                  inpValue={formData.otp}
-                  onChange={handleChange}
+                  inpType="text"
+
+                  inpName="name"
+
+                  inpValue={
+                    formData.name
+                  }
+
+                  inpPlaceholder="Enter Name"
+
+                  onChange={
+                    handleChange
+                  }
+
                 />
 
               </Box>
-              {/* New Password */}
+
 
               <Box>
 
                 <Typography
                   variant="body2"
                   sx={{
-                    mb: 1,
+                    marginBottom: "9px"
                   }}
                 >
-                  Enter New Password
+                  New User's Email
+                </Typography>
+
+
+                <Input
+                  inpType="email"
+
+                  inpName="email"
+
+                  inpValue={
+                    formData.email
+                  }
+
+                  inpPlaceholder="Enter Email"
+
+                  onChange={
+                    handleChange
+                  }
+
+                  isReq
+                />
+
+              </Box>
+
+
+              <Box>
+
+                <Typography
+                  variant="body2"
+                  sx={{
+                    marginBottom: "9px"
+                  }}
+                >
+                  New User's Password
                 </Typography>
 
                 <Box
@@ -257,7 +323,7 @@ const ResetPassword =
               </Box>
 
               <Button
-                btnName="Reset Password"
+                btnName="Create User"
                 btnColor="secondary.main"
                 btnType="submit"
                 btnWidth="100%"
@@ -275,13 +341,19 @@ const ResetPassword =
           </Box>
 
         </Paper>
-
+        
         <Popup
-          isOpen={popup.open}
+          isOpen={
+            popup.open
+          }
 
-          title={popup.title}
+          title={
+            popup.title
+          }
 
-          message={popup.message}
+          message={
+            popup.message
+          }
 
           onCancel={() => {
 
@@ -320,4 +392,6 @@ const ResetPassword =
     );
   };
 
-export default ResetPassword;
+
+export default
+  AddUserPage;

@@ -27,6 +27,26 @@
 - quotationController.js
 - settingsController.js
 
+### 📁 electron/
+
+- ipcHandlers.js
+
+- 📁 ipc/
+  - dialogIPC.js
+  - filesystemIPC.js
+  - notificationIPC.js
+  - printerIPC.js
+  - systemIPC.js
+
+- 📁 native/
+  - appMenu.js
+  - appPaths.js
+  - notifications.js
+  - tray.js
+  - updater.js
+  - windowManager.js
+
+
 ---
 
 ### 📁 jobs/
