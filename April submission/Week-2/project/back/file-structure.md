@@ -16,6 +16,7 @@
 - atlasDb.js
 - envConfig.js
 - localDb.js
+- setDatabase.js
 
 ---
 
@@ -23,6 +24,7 @@
 
 - authController.js
 - clientController.js
+- importController.js
 - inventoryController.js
 - quotationController.js
 - settingsController.js
@@ -63,6 +65,7 @@
 
 ### 📁 models/
 
+
 - 📁 atlas/
   - Client.js
   - Inventory.js
@@ -70,12 +73,14 @@
   - Settings.js
   - User.js
 
-- 📁 local/
+- 📁 Local/
   - Client.js
   - Inventory.js
   - Quotation.js
   - Settings.js
   - User.js
+
+- getModels.js
 
 ---
 
@@ -103,17 +108,11 @@
 
 - authService.js
 - clientService.js
+- importQuotationService.js
 - inventoryService.js
 - quotationService.js
 - settingsService.js
 - syncService.js
-
-
----
-
-### 📁 template/
-
-- quotation_template.xlsx
 
 ---
 
@@ -126,7 +125,7 @@
   - convertExcelToPdf.js
 
 - 📁 storage/
-  - createStorage.js
+  - createStoragePath.js
   - saveQuotationFiles.js
 
 - checkInternet.js
